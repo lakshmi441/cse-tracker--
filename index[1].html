@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>CSE Growth Tracker</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#4f46e5">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);--bg:#f6f7fb;--card:#fff;--tx:#1c2030;--mu:#6b7288;--bd:#e2e5ef;--ac:#4f46e5;--ok:#16a34a;--wip:#d97706;--sk:#94a3b8}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#12141c;--card:#1b1e2a;--tx:#e8eaf3;--mu:#98a0b8;--bd:#2c3040;--ac:#818cf8;--ok:#4ade80;--wip:#fbbf24}}
+:root[data-theme="dark"]{--bg:#12141c;--card:#1b1e2a;--tx:#e8eaf3;--mu:#98a0b8;--bd:#2c3040;--ac:#818cf8;--ok:#4ade80;--wip:#fbbf24}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--tx);font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
+main{max-width:680px;margin:0 auto;padding:16px 14px 40px}
+h1{font-size:1.3rem;margin:0}h2{font-size:1rem;margin:0 0 8px}.mu{color:var(--mu);font-size:.85rem}
+nav{display:flex;gap:6px;margin:12px 0;overflow-x:auto}
+nav button,.b,.g{border-radius:10px;padding:8px 14px;font-size:.9rem;cursor:pointer;border:1px solid var(--bd);background:var(--card);color:var(--tx)}
+nav button.on,.b{background:var(--ac);color:#fff;border-color:var(--ac)}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:14px 16px;margin-bottom:12px}
+.bar{height:8px;background:var(--bd);border-radius:99px;overflow:hidden;margin-top:6px}.bar i{display:block;height:100%;background:var(--ok)}
+.big{font-size:1.5rem;font-weight:700}.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.sp{justify-content:space-between}
+.task{padding:12px 0;border-top:1px solid var(--bd)}.task:first-of-type{border-top:0}
+.t{font-weight:600}.done .t{text-decoration:line-through;opacity:.6}
+.tag{font-size:.72rem;border:1px solid var(--bd);border-radius:99px;padding:1px 8px;color:var(--mu)}
+select,input{background:var(--bg);color:var(--tx);border:1px solid var(--bd);border-radius:8px;padding:7px 9px;font-size:.88rem;max-width:100%}
+.s{font-size:.78rem;border-radius:99px;padding:4px 9px;border:1px solid var(--bd);background:var(--bg);color:var(--mu);cursor:pointer}
+.s.on1{color:var(--wip);border-color:var(--wip)}.s.on2{background:var(--ok);color:#fff;border-color:var(--ok)}.s.on4{background:var(--ac);color:#fff;border-color:var(--ac)}.s.on3{background:var(--sk);color:#fff;border-color:var(--sk)}
+.clock{font-size:3rem;font-weight:700;text-align:center;font-variant-numeric:tabular-nums;margin:8px 0}
+.hid{display:none}
+</style></head><body><main>
+<h1>📈 CSE Growth Tracker</h1><div class="mu" id="sub"></div>
+<nav id="nav"></nav><div id="v"></div>
+<script>
+const DAYS=[
+[["Java","OOP refresher","Classes, objects, constructors; write 3 small programs",45,"Easy","High"],["DSA","3 array problems","Max element, reverse, second largest",45,"Easy","High"],["SQL","SELECT, WHERE, ORDER BY","Create a table, insert 5 rows, query it",30,"Easy","Medium"],["Aptitude","10 percentage questions","Note the shortcut for each",20,"Easy","Medium"],["Career","Create GitHub repo","Repo 'cse-180-days' with README, push Java code",20,"Easy","High"]],
+[["Java","Inheritance & polymorphism","Override vs overload; write a Shape hierarchy",45,"Medium","High"],["DSA","3 string problems","Palindrome, anagram, reverse words",45,"Easy","High"],["SQL","INSERT / UPDATE / DELETE","Practice on your table",30,"Easy","Medium"],["Aptitude","10 ratio questions","",20,"Easy","Medium"],["Theory","OOP pillars notes","One example per pillar",30,"Easy","Medium"]],
+[["Java","Abstraction & interfaces","Abstract class vs interface",45,"Medium","High"],["DSA","Big-O + 3 problems","Time complexity of your earlier solutions",45,"Medium","High"],["SQL","Aggregates + GROUP BY","COUNT, SUM, AVG, HAVING",30,"Medium","Medium"],["Aptitude","10 profit & loss questions","",20,"Easy","Low"],["Project","Plan Student Mgmt System","List entities, classes, features",30,"Easy","High"]],
+[["Java","Encapsulation & exceptions","try/catch, custom exception",45,"Medium","High"],["DSA","3 two-pointer problems","Pair sum, remove duplicates",45,"Medium","High"],["SQL","Keys & constraints","PRIMARY, FOREIGN, UNIQUE, NOT NULL",30,"Easy","Medium"],["Aptitude","10 time & work questions","",20,"Medium","Low"],["Project","Build Student & Course classes","Fields, constructors, getters",40,"Medium","High"]],
+[["Java","Collections","ArrayList and HashMap basics",45,"Medium","High"],["DSA","3 prefix-sum problems","Range sum, subarray sum",45,"Medium","High"],["SQL","Joins","INNER and LEFT JOIN on two tables",40,"Medium","High"],["Theory","DBMS: ACID","Explain each property in your own words",30,"Medium","Medium"],["Career","Commit your code","At least 3 meaningful commits",15,"Easy","Medium"]],
+[["Project","Add CRUD menu","Add, view, update, delete students",60,"Medium","High"],["DSA","Revisit 3 unsolved problems","Solve again without hints",45,"Medium","High"],["Aptitude","15 mixed timed questions","",25,"Medium","Medium"],["Theory","OS: process vs thread","Write a comparison table",30,"Medium","Medium"],["Java","File I/O basics","Save students to a file",30,"Medium","Low"]],
+[["Java","Revision + 5 programs","Redo weak topics from the week",45,"Medium","High"],["DSA","2 medium array/string problems","Time yourself",45,"Medium","High"],["SQL","Write 10 queries alone","On your own table design",40,"Medium","High"],["Project","Finish README, push","Screenshots and how to run",30,"Easy","High"],["Career","Weekly reflection","Write what felt weak this week",15,"Easy","High"]]];
+const SUBJ=["Java","DSA","SQL","Aptitude","Theory","Project","Career"],ST=["Not started","In progress","Completed","Skipped","Needs revision"];
+let S={day:1,st:{},ses:[],free:120};try{const r=localStorage.getItem("cse_p1");if(r)S=JSON.parse(r)}catch(e){}
+S.free=S.free||120;const save=()=>{try{localStorage.setItem("cse_p1",JSON.stringify(S))}catch(e){}};
+const esc=x=>String(x).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const key=(d,i)=>d+"-"+i,gs=(d,i)=>S.st[key(d,i)]||0;
+const today=()=>new Date().toISOString().slice(0,10);
+const fm=m=>Math.floor(m/60)+"h "+Math.round(m%60)+"m";
+const spent=(d,i)=>S.ses.filter(s=>s.k==key(d,i)).reduce((a,s)=>a+s.m,0);
+let tab="today",T=null;
+const tabs=[["today","Today"],["timer","Timer"],["progress","Progress"]];
+function recovery(){const r=[];DAYS.forEach((ts,d)=>ts.forEach((t,i)=>{const s=gs(d+1,i);if(s==4||(t[5]=="High"&&s!=2&&(d+1<S.day||s==3)))r.push([d+1,i])}));return r}
+function render(){
+document.getElementById("sub").textContent="Day "+S.day+" of 180 · Week 1 plan loaded (7 days)";
+document.getElementById("nav").innerHTML=tabs.map(t=>'<button class="'+(tab==t[0]?"on":"")+'" data-t="'+t[0]+'">'+t[1]+'</button>').join("");
+document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>{tab=b.dataset.t;render()});
+const v=document.getElementById("v");
+if(tab=="today")v.innerHTML=todayV();else if(tab=="timer")v.innerHTML=timerV();else v.innerHTML=progV();
+bind()}
+function pick(d,free){const ts=DAYS[d-1]||[],o={High:0,Medium:1,Low:2};
+const idx=ts.map((_,i)=>i).sort((a,b)=>o[ts[a][5]]-o[ts[b][5]]||a-b);const sel=[];let u=0;
+for(const i of idx){if(sel.length>=7)break;if(!sel.length||u+ts[i][3]<=free){sel.push(i);u+=ts[i][3]}}return sel.sort((a,b)=>a-b)}
+function todayV(){
+const ts=DAYS[S.day-1]||[],sel=pick(S.day,S.free);let est=0,done=0;
+sel.forEach(i=>{est+=ts[i][3];if(gs(S.day,i)==2)done++});
+const studied=S.ses.filter(s=>s.d==today()).reduce((a,s)=>a+s.m,0);
+let h='<div class="row sp" style="margin-bottom:10px"><button class="g" data-a="prev">‹ Day</button><b>Day '+S.day+'</b><button class="g" data-a="next">Day ›</button></div>';
+h+='<div class="card"><h2>How much free study time do you have today?</h2><div class="row">'+[[30,"30 min"],[60,"1 hour"],[120,"2 hours"],[180,"3 hours"],[240,"4+ hours"]].map(([m,l])=>'<button class="s '+(S.free==m?"on2":"")+'" data-a="free" data-m="'+m+'">'+l+'</button>').join("")+'</div><div class="mu" style="margin-top:6px">Priorities are picked to fit this time. The rest stay optional.</div></div>';
+h+='<div class="card"><div class="big">'+done+'/'+sel.length+' priorities · '+(sel.length?Math.round(100*done/sel.length):0)+'%</div><div class="bar"><i style="width:'+(sel.length?100*done/sel.length:0)+'%"></i></div><div class="mu" style="margin-top:8px">Estimated '+fm(est)+' · Studied today (timer) '+fm(studied)+'</div></div>';
+if(!ts.length)return h+'<div class="card mu">Only Week 1 is loaded so far. Tell Claude to load the next week.</div>';
+h+='<div class="card"><h2>Today\'s priorities</h2>'+sel.map(i=>taskH(S.day,i,ts[i])).join("")+'</div>';
+const opt=ts.map((_,i)=>i).filter(i=>!sel.includes(i));
+if(opt.length)h+='<div class="card"><h2>Optional</h2>'+opt.map(i=>taskH(S.day,i,ts[i])).join("")+'</div>';
+const rc=recovery();
+h+='<div class="card"><h2>🔁 Recovery &amp; revision queue</h2>'+(rc.length?rc.map(([d,i])=>taskH(d,i,DAYS[d-1][i],1)).join(""):'<div class="mu">Nothing here. Skipped or missed high-priority tasks and anything marked Needs revision land here.</div>')+'</div>';
+h+=summaryH(done,sel.length,studied);return h}
+function taskH(d,i,t,rec){const s=gs(d,i),sp=spent(d,i);
+return '<div class="task'+(s==2?" done":"")+'"><div class="t">'+esc(t[0])+': '+esc(t[1])+(rec?' <span class="tag">Day '+d+'</span>':'')+'</div><div class="mu">'+esc(t[2])+'</div>'
++'<div class="row" style="margin:6px 0"><span class="tag">'+t[3]+' min</span><span class="tag">'+t[4]+'</span><span class="tag">'+t[5]+' priority</span><span class="tag">spent '+Math.round(sp)+' min</span></div>'
++'<div class="row">'+ST.map((n,k)=>'<button class="s '+(s==k&&k?"on"+k:"")+'" style="'+(s==k&&!k?"border-color:var(--tx);color:var(--tx)":"")+'" data-a="st" data-d="'+d+'" data-i="'+i+'" data-k="'+k+'">'+n+'</button>').join("")+'</div>'
++'<input placeholder="Notes" style="margin-top:6px;width:100%" data-a="note" data-d="'+d+'" data-i="'+i+'" value="'+esc(S.st["n"+key(d,i)]||"")+'"></div>'}
+function summaryH(done,n,studied){
+const subs=[...new Set(DAYS[S.day-1].filter((t,i)=>gs(S.day,i)==2).map(t=>t[0]))];
+const pr=[];recovery().forEach(([d,i])=>pr.push("Recover — "+DAYS[d-1][i][0]+": "+DAYS[d-1][i][1]));
+(DAYS[S.day]?pick(S.day+1,S.free).map(i=>DAYS[S.day][i]):[]).forEach(t=>pr.push(t[0]+": "+t[1]));
+return '<div class="card"><h2>🌙 Daily summary</h2><div>Today you studied '+fm(studied)+', completed '+done+'/'+n+' tasks'+(subs.length?', and made progress in '+subs.join(", "):'')+'.</div><h2 style="margin-top:12px">Tomorrow\'s priorities</h2>'
++(pr.length?'<ol style="margin:0;padding-left:20px">'+pr.slice(0,7).map(x=>'<li>'+esc(x)+'</li>').join("")+'</ol>':'<div class="mu">None yet.</div>')+'</div>'}
+function timerV(){
+const ts=DAYS[S.day-1]||[];
+let h='<div class="card"><h2>Study timer</h2><div class="clock" id="clk">'+clk(T?T.left:25*60)+'</div>';
+if(!T||T.done){h+='<div class="row"><select id="tk"><option value="">Other (no task)</option>'+ts.map((t,i)=>'<option value="'+i+'">'+esc(t[0]+": "+t[1])+'</option>').join("")+'</select>'
++'<select id="dur"><option value="25">25 min</option><option value="50">50 min</option><option value="c">Custom</option></select><input id="cus" type="number" min="1" placeholder="min" style="width:70px"><button class="b" data-a="start">Start</button></div>'}
+if(T&&!T.done)h+='<div class="row"><button class="g" data-a="stop">Stop and save</button></div>';
+if(T&&T.done)h+='<div class="mu">Time is up! What did you work on?</div>';
+if(T&&T.done)h+='<div class="row"><input id="wn" placeholder="What did you work on?" style="flex:1"><button class="b" data-a="save">Save session</button></div>';
+h+='</div><div class="card"><h2>Recent sessions</h2>'+(S.ses.slice(-8).reverse().map(s=>'<div class="task"><b>'+esc(s.sub)+'</b> · '+Math.round(s.m)+' min · '+s.d+'<div class="mu">'+esc(s.n||"")+'</div></div>').join("")||'<div class="mu">No sessions yet.</div>')+'</div>';return h}
+const clk=s=>String(Math.floor(s/60)).padStart(2,"0")+":"+String(Math.floor(s%60)).padStart(2,"0");
+function progV(){
+let h='<div class="card"><h2>Subject progress (planned minutes completed)</h2>';
+SUBJ.forEach(sb=>{let tot=0,dn=0;DAYS.forEach((ts,d)=>ts.forEach((t,i)=>{if(t[0]==sb){tot+=t[3];if(gs(d+1,i)==2)dn+=t[3]}}));
+const p=tot?Math.round(100*dn/tot):0;h+='<div style="margin:10px 0"><div class="row sp"><span>'+sb+'</span><span class="mu">'+p+'%</span></div><div class="bar"><i style="width:'+p+'%"></i></div></div>'});
+let all=0,ok=0;DAYS.forEach((ts,d)=>ts.forEach((t,i)=>{all++;if(gs(d+1,i)==2)ok++}));
+h+='</div><div class="card"><div class="big">'+ok+'/'+all+'</div><div class="mu">tasks completed in the Week 1 plan</div><div class="bar"><i style="width:'+(100*ok/all)+'%"></i></div></div>';
+const tot=S.ses.reduce((a,s)=>a+s.m,0);
+return h+'<div class="card"><div class="big">'+fm(tot)+'</div><div class="mu">total timed study across '+S.ses.length+' sessions</div></div>'}
+let iv=null;
+function tick(){if(!T||T.done)return;T.left=Math.max(0,Math.round((T.end-Date.now())/1000));
+const c=document.getElementById("clk");if(c)c.textContent=clk(T.left);
+if(T.left<=0){T.done=true;T.m=T.mins;clearInterval(iv);render()}}
+function bind(){document.querySelectorAll("[data-a]").forEach(el=>{const a=el.dataset.a;
+if(a=="note")el.onchange=()=>{S.st["n"+key(el.dataset.d,el.dataset.i)]=el.value;save()};
+else el.onclick=()=>{
+if(a=="free"){S.free=+el.dataset.m;save();render()}
+else if(a=="st"){S.st[key(el.dataset.d,el.dataset.i)]=+el.dataset.k;save();render()}
+else if(a=="prev"&&S.day>1){S.day--;save();render()}
+else if(a=="next"&&S.day<7){S.day++;save();render()}
+else if(a=="start"){const d=document.getElementById("dur").value;const m=d=="c"?+document.getElementById("cus").value:+d;if(!m)return;
+const k=document.getElementById("tk").value;T={mins:m,end:Date.now()+m*60000,left:m*60,task:k===""?null:+k,done:false};clearInterval(iv);iv=setInterval(tick,500);render()}
+else if(a=="stop"){clearInterval(iv);T.m=Math.max(1,(T.mins*60-T.left)/60);T.done=true;render()}
+else if(a=="save"){const t=T.task!==null?DAYS[S.day-1][T.task]:null;
+S.ses.push({d:today(),m:T.m,sub:t?t[0]:"Other",k:t?key(S.day,T.task):"",n:(t?t[1]+" — ":"")+document.getElementById("wn").value});
+if(t&&gs(S.day,T.task)==0)S.st[key(S.day,T.task)]=1;T=null;save();render()}}})}
+render();
+if("serviceWorker" in navigator)navigator.serviceWorker.register("./service-worker.js").catch(()=>{});
+</script></main></body></html>
